@@ -99,5 +99,5 @@ newBookButton.addEventListener('click', showForm);
 
 
 addToLibrary('The Hobbit', 'J.R.R. Tolkien', 456, false);
-addToLibrary('The Giver', 'Some Guy', 100, true);
+addToLibrary('The Giver', 'Lois Lowry', 100, true);
 initialize();
