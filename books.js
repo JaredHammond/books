@@ -21,6 +21,7 @@ function submitBook() {
     const newAuthor = authorBox.value;
 
     addToLibrary(newTitle, newAuthor);
+    saveBooks();
 }
 
 function showForm() {
@@ -57,6 +58,8 @@ function showForm() {
 const cardArea = document.getElementById('card-area');
 
 function initialize() {
+        retrieveBooks();
+
         myLibrary.forEach(book => {
         const card = document.createElement('div');
         card.classList.add('book-card');
@@ -77,6 +80,19 @@ function initialize() {
     })
 }
 
+const saveBooks = () => {
+    let books = JSON.stringify(myLibrary);
+    localStorage.setItem('books', books);
+}
+
+const retrieveBooks = () => {
+    try {
+        let books = JSON.parse('books');
+        myLibrary = books;
+    } catch {
+        return;
+    }
+}
 
 const newBookButton = document.getElementById('new-book');
 newBookButton.addEventListener('click', showForm);
