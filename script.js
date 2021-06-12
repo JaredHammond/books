@@ -1,14 +1,11 @@
 const displayController = (() => {
+    // Puts each book into a DOM object called a card and sends them to the DOM Conductor to be displayed
     const showBookCards = (lib) => {
         let cards = [];
         lib.forEach(book => {
             cards.push(domConductor.makeInfoCard(book));
         })
         domConductor.appendCards(cards);
-    }
-
-    const showForm = () => {
-        domConductor.grabFormElements
     }
 
     return {
@@ -18,7 +15,7 @@ const displayController = (() => {
 })();
 
 const domConductor = (() => {
-
+    // Module variables
     let content = document.getElementById('content');
     let cardArea = document.getElementById('card-area');
 
@@ -27,12 +24,17 @@ const domConductor = (() => {
         return document.createElement(type);
     }
 
+    // Accepts a standard object with key:attribute pairs and applies them to the element 'el'
     function setAttributes(el, attr) {
         for (key in attr) {
             el.setAttribute(key, attr[key]);
         }
     }
 
+    const addToContent = (el) => {
+        content.appendChild(el);
+    }
+    
     const appendCards = (cards) => {
         cards.forEach(card => cardArea.appendChild(card));
     }
@@ -51,30 +53,30 @@ const domConductor = (() => {
         const newBookForm = create('form');
 
         const titleLabel = create('label');
-        titleLabel.setAttribute('for','title');
+        titleLabel.setAttribute('for','title-input');
         titleLabel.innerText = 'Title';
         newBookForm.appendChild(titleLabel);
         
         const titleBox = create('input');
-        setAttributes(titleBox, {'id':'title', 'type':'text', 'required':''});
+        setAttributes(titleBox, {'id':'title-input', 'type':'text', 'required':''});
         newBookForm.appendChild(titleBox);
     
         const authorLabel = create('label');
-        authorLabel.setAttribute('for','author');
+        authorLabel.setAttribute('for','author-input');
         authorLabel.innerText = 'Author';
         newBookForm.appendChild(authorLabel);
     
         const authorBox = create('input');
-        setAttributes(authorBox, {'id':'author', 'type':'text', 'required':''});
+        setAttributes(authorBox, {'id':'author-input', 'type':'text', 'required':''});
         newBookForm.appendChild(authorBox);
 
         const readLabel = create('lavel')
-        readLabel.setAttribute('for','read');
+        readLabel.setAttribute('for','read-input');
         readLabel.innerText = 'Have read?';
         newBookForm.appendChild(readLabel);
 
         const readInput = create('input')
-        setAttributes(readInput, {'id':'read', 'type':'checkbox'});
+        setAttributes(readInput, {'id':'read-input', 'type':'checkbox'});
         newBookForm.appendChild(readInput);
         
         const submitButton = create('button');
@@ -82,12 +84,14 @@ const domConductor = (() => {
         newBookForm.appendChild(submitButton);
 
         cardArea.appendChild(newBookForm);
+
+        eventHandler.submitButtonListener(submitButton);
     }
 
     const grabFormElements = () => {
-        formTitle = document.getElementById('title-input');
-        formAuthor = document.getElementById('author-input');
-        formHaveRead = document.getElementById('read-input');
+        formTitle = document.getElementById('title-input').value;
+        formAuthor = document.getElementById('author-input').value;
+        formHaveRead = document.getElementById('read-input').value;
 
         return [formTitle,formAuthor,formHaveRead];
     }
@@ -111,6 +115,13 @@ const domConductor = (() => {
         return card;
     }
 
+    const createNewBookButton = () => {
+        let button = create('button');
+        button.innerText = 'New Book';
+        button.id = 'new-book';
+        return button;
+    }
+
     const grabFormButton = () => {
         let button = document.getElementById('new-book');
         return button;
@@ -124,6 +135,8 @@ const domConductor = (() => {
         grabFormButton,
         resetCardArea,
         createForm,
+        createNewBookButton,
+        addToContent,
     }
 })();
 
@@ -140,6 +153,7 @@ const libraryManager = (() => {
     }
 
     const addToLibrary = (title, author, haveRead) => {
+        haveRead == 'on' ? haveRead = true : haveRead = false;
         library.push(new Book(title, author, haveRead))
         storageController.storeLibrary(library);
     }
@@ -171,15 +185,22 @@ const eventHandler = (function() {
         let lib = libraryManager.updateLibrary();
         domConductor.initDomObjects;
         displayController.showBookCards(lib);
-        newBookButtonEvent()
+        let button = domConductor.createNewBookButton();
+        domConductor.addToContent(button);
+        newBookButtonEvent(button);
     }
 
-    const newBookButtonEvent = () => {
-        let button = domConductor.grabFormButton();
+    const newBookButtonEvent = (button) => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
-            let form = domConductor.createForm();
-            
+            domConductor.createForm();
+        })
+    }
+
+    const submitButtonListener = (button) => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            submitBook();
         })
     }
 
@@ -187,12 +208,17 @@ const eventHandler = (function() {
         let form = domConductor.grabFormElements();
         libraryManager.addToLibrary(form[0], form[1], form[2]);
         domConductor.resetCardArea();
-        
+        let lib = libraryManager.getLibrary();
+        displayController.showBookCards(lib);
+        let button = domConductor.createNewBookButton();
+        domConductor.addToContent(button);
+        newBookButtonEvent(button);
     }
 
     return {
         initialize,
         submitBook,
+        submitButtonListener,
     }
 })();
 
