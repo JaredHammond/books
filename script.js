@@ -229,11 +229,13 @@ const storageController = (() => {
     }
 
     const retrieveLibrary = () => {
-        try {
+        if (localStorage.books) {
             let retrieved = localStorage.getItem('books');
             let books = JSON.parse(retrieved)
             return books;
-        } catch {
+        } else {
+            libraryManager.addToLibrary('The Hobbit', 'J.R.R. Tolkien', false);
+            libraryManager.addToLibrary('The Giver', 'Lois Lowry', true);
             return [];
         }
     }
@@ -243,9 +245,5 @@ const storageController = (() => {
         retrieveLibrary,
     }
 })();
-
-// Baseline items to populate window
-libraryManager.addToLibrary('The Hobbit', 'J.R.R. Tolkien', false);
-libraryManager.addToLibrary('The Giver', 'Lois Lowry', true);
 
 eventHandler.initialize();
